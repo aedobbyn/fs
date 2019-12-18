@@ -453,15 +453,21 @@ path_common <- function(path) {
 #'
 #' path_filter(c("foo", "boo", "bar"), regexp = "b.r")
 path_filter <- function(path, glob = NULL, regexp = NULL, invert = FALSE, ...) {
+
   if (!is.null(glob)) {
+    glob <- utils::glob2rx(glob)
     if (!is.null(regexp)) {
-      stop(fs_error("`glob` and `regexp` cannot both be set."))
+      glob %<>% stringr::str_sub(2L)
+      regexp <- glue::glue("{regexp}{glob}")
+    } else {
+      regexp <- glob
     }
-    regexp <- utils::glob2rx(glob)
   }
+
   if (!is.null(regexp)) {
     path <- grep(x = path, pattern = regexp, value = TRUE, invert = isTRUE(invert), ...)
   }
+
   setNames(path_tidy(path), path)
 }
 
